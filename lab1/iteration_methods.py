@@ -1,6 +1,6 @@
 from prettytable import prettytable, PrettyTable
 
-class Solver:
+class EquationsSolver:
 
     def __init__(self):
         self.target_function = None
