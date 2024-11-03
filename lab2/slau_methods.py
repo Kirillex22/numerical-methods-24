@@ -62,6 +62,28 @@ class SlauSolver:
         return self.rounder(current_x).tolist(), num_iters
 
 
+    def run_trough(self):
+        A: np.array = np.delete(self.system, -1, axis=1)
+        b: np.array = self.system[:, -1]
+        u: np.array = np.array([0 for i in range(self.dim)]).astype(np.float64)
+        v: np.array = np.array([0 for i in range(self.dim)]).astype(np.float64)
+        solution: np.array = np.array([0 for i in range(self.dim)]).astype(np.float64)
+
+        u[0] = -self.system[0, 1] / self.system[0, 0]
+        v[0] = self.system[0, -1] / self.system[0, 0]
+
+        for i in range(1, self.dim):
+            u[i] = -A[i, (i + 1) % self.dim] / (A[i, i - 1] * u[i - 1] + A[i, i])
+            v[i] = (b[i] - A[i, i - 1] * v[i - 1]) / (A[i, i - 1] * u[i - 1] + A[i, i])
+
+        solution[-1] = v[-1]
+
+        for i in reversed(range(self.dim - 1)):
+            solution[i] = u[i] * solution[i + 1] + v[i]
+
+        return solution
+
+
     def jacobi(self, current_x: np.array) -> (list, int):
         A: np.array = np.delete(self.system, -1, axis=1)
         b: np.array = self.system[:, -1]

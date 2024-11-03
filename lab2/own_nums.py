@@ -12,7 +12,7 @@ class MatrixSolver:
         self.dim = len(matrix)
 
 
-    def get_own_nums(self):
+    def get_own_nums(self) -> np.array:
         dets: list[float] = [np.linalg.det(self.matrix - i*np.eye(self.dim)) for i in range(self.dim)]
 
         raw_b: list[list[int]] = []
@@ -21,26 +21,34 @@ class MatrixSolver:
             raw_b.append([i**j for j in reversed(range(1, self.dim))])
 
         B: np.array = np.array(raw_b)
-
         rev_b = np.linalg.inv(B)
 
-        d: list[float] = []
-
+        d = []
         for i in range(1, self.dim):
             d.append(dets[i] - dets[0] - i**self.dim)
 
-        return np.dot(rev_b, d)
+        d = np.array(d)
+        p = np.array([1] + np.dot(rev_b, d).tolist() + [dets[0]])
+
+        return np.roots(p)
 
 
-ms = MatrixSolver()
-matrix = np.array([
-        [1.46, 23.14, -0.78, 1.13],
-        [2.31, 1.58, 6.73, 1.61],
-        [-0.13, -9.21, 7.41, 1.23],
-        [0.96, 1.23, 3.79, 5.46]
-    ]).astype(np.float64)
+    def rev_matrix(self, A, b) -> np.array:
+        return np.dot(np.linalg.inv(A),b)
 
-ms.load_matrix(matrix)
 
-print(ms.get_own_nums())
-print(np.linalg.eig(matrix)[0])
+    def get_own_vectors(self, own_nums: np.array) -> np.array:
+        solution = []
+        for num in own_nums:
+            current_x = np.array([1 for i in range(self.dim)]).T
+            system = self.matrix - np.eye(self.dim) * num
+            _num = num + 1
+
+            while np.abs(_num - num) > 1e-5:
+                current_y = self.rev_matrix(system, current_x)
+                current_x = current_y/np.linalg.norm(current_y)
+                _num = np.dot(current_x.T, np.dot(self.matrix, current_x))/np.dot(current_x.T, current_x)
+
+            solution.append(current_x)
+
+        return solution
