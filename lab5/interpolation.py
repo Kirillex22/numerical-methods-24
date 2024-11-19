@@ -153,7 +153,7 @@ class Interpolator:
                 np.array([
                     [x0**2, x0, 1, y0],
                     [x1**2, x1, 1, y1],
-                    [x2 ** 2, x2, 1, y2]
+                    [x2**2, x2, 1, y2]
                 ]
                 ).astype(np.float64)
             ))
